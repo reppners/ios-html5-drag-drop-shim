@@ -10,10 +10,30 @@ module.exports = function (grunt) {
       },
       release: {
         options: {
+          mangle: true, // mangle var names
+          mangleProperties: true, // mangle props
+          reserveDOMProperties: true, // do not mangle DOM or js props
+          mangleRegex: /^_/,  // mangle all props starting with an `_`
+          compress: {
+            global_defs: {
+              "DEBUG": false
+            },
+            drop_console: true, // remove console log statements
+            drop_debugger: true, // remove debugger statements
+            dead_code: true, // removes unreachable code
+            unused: true, // remove unused code
+            sequences: true,
+            if_return: true,
+            join_vars: true,
+            keep_fargs: true,
+            conditionals: true,
+            evaluate: true
+          },
           sourceMap: true,
-          sourceMapIn: "release/mobile-drag-and-drop-polyfill.js.map"
+          sourceMapIn: "mobile-drag-and-drop-polyfill.js.map",
+          report: "min"
         },
-        src: "release/mobile-drag-and-drop-polyfill.js",
+        src: "mobile-drag-and-drop-polyfill.js",
         dest: "release/mobile-drag-and-drop-polyfill.min.js"
       }
     },
@@ -38,16 +58,30 @@ module.exports = function (grunt) {
     ts: {
       dev: {
         src: ["*.ts", "!node_modules/**/*.ts"],
-        watch: '.'
+        watch: ".",
+        options: {
+          target: "es5"
+        }
       },
       release: {
         src: ["*.ts", "!node_modules/**/*.ts"],
-        outDir: './release',
+        outDir: './release/',
         options: {
-          comments: false,
+          noImplicitAny: true,
+          suppressImplicitAnyIndexErrors: true,
+          removeComments: true,
           declaration: true,
           fast: "never",
           target: "es5"
+        }
+      },
+      es6: {
+        src: ["*.ts", "!node_modules/**/*.ts"],
+        out: "mobile-drag-and-drop-polyfill.es6.js",
+        options: {
+          declaration: false,
+          fast: "never",
+          target: "es6"
         }
       }
     },
@@ -61,7 +95,7 @@ module.exports = function (grunt) {
       demoPage: {
         files: [
           // includes files within path
-          {expand: true, cwd: 'release', src: ['*.js', '*.css'], dest: 'spec-compliance/', filter: 'isFile', flatten: true}
+          {expand: true, cwd: 'release', src: ['*.map', '*.js', '*.css'], dest: 'spec-compliance/', filter: 'isFile', flatten: true}
         ]
       }
     }
@@ -72,7 +106,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-copy");
   grunt.loadNpmTasks("grunt-ts");
 
-  grunt.registerTask("release", ["ts:release", "copy:release", "uglify:release", "copy:demoPage"]);
+  grunt.registerTask("release", ["ts:release", "uglify:release", "copy:release", "copy:demoPage"]);
 
   grunt.registerTask("default", ["connect:dev", "ts:dev"]);
 };
