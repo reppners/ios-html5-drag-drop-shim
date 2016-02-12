@@ -1,4 +1,4 @@
-var MobileDragAndDropPolyfill;
+export var MobileDragAndDropPolyfill;
 (function (MobileDragAndDropPolyfill) {
     var detectedFeatures;
     function detectFeatures() {
